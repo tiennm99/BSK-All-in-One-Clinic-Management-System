@@ -101,7 +101,7 @@ public class Client implements Client_Interface {
 
         String option = null;
         User selectedUser = null;
-        // Infinite menu loop
+        //Infinite menu loop
         while (true) {
             // If the user is logged in, show the main menu
             System.out.println("Enter 1|username|password to login");
@@ -116,6 +116,45 @@ public class Client implements Client_Interface {
         
             }
         }
+
+        // while(true) {
+        //     System.out.println("Welcome to BsK! By D&T Solutions");
+        //     System.out.println("Please select an option:");
+        //     System.out.println("1. Login");
+        //     System.out.println("2. Register");
+        //     System.out.println("3. Exit");
+        //     Scanner scanner = new Scanner(System.in);
+        //     String input = scanner.nextLine();
+        //     String choice = input.split("\\|")[0];
+        //     switch(choice) {
+        //         case "1":
+        //             System.out.println("Enter your username:");
+        //             String username = scanner.nextLine();
+        //             System.out.println("Enter your password:");
+        //             String password = scanner.nextLine();
+        //             String response = sendRequest("1|" + username + "|" + password);
+        //             if (response.equals("Invalid username or password")) {
+        //                 System.out.println("Invalid username or password");
+        //             } else {
+        //                 loggedInUser = new User(username, password, Integer.parseInt(response.split("\\|")[0]), Integer.parseInt(response.split("\\|")[1]), true, response.split("\\|")[2]);
+        //                 System.out.println("Successfully logged in as " + username);
+        //             }
+        //             break;
+        //         case "2":
+        //             System.out.println("Enter your username:");
+        //             username = scanner.nextLine();
+        //             System.out.println("Enter your password:");
+        //             password = scanner.nextLine();
+        //             // response = sendRequest("2|" + username + "|" + password);
+        //             if (response.equals("Username already exists")) {
+        //                 System.out.println("Username already exists");
+        //             } else {
+        //                 loggedInUser = new User(username, password, Integer.parseInt(response.split("\\|")[0]), response.split("\\|")[1]);
+        //                 System.out.println("Successfully registered as " + username);
+        //             }
+        //             break;
+        //     }
+        //}
     }
 }
 
