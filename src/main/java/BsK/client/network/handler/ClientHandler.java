@@ -2,8 +2,10 @@ package BsK.client.network.handler;
 
 import BsK.common.packet.Packet;
 import BsK.common.packet.PacketSerializer;
+import BsK.common.packet.req.GetPatientInfoReq;
 import BsK.common.packet.req.LoginRequest;
 import BsK.common.packet.res.ErrorResponse;
+import BsK.common.packet.res.GetPatientInfoRes;
 import BsK.common.packet.res.HandshakeCompleteResponse;
 import BsK.common.packet.res.LoginSuccessResponse;
 import BsK.common.util.network.NetworkUtil;
@@ -35,7 +37,16 @@ public class ClientHandler extends SimpleChannelInboundHandler<TextWebSocketFram
           default -> log.error("Received error response: {}", response.getError());
         }
       }
-      case LoginSuccessResponse loginSuccessResponse -> log.info("Received login success response");
+      case LoginSuccessResponse loginSuccessResponse -> {
+        log.info("Received login success response, id {}, rold {}", loginSuccessResponse.getId(), loginSuccessResponse.getRole());
+
+        // Chỉ để demo, chỉ nên request khi mà user click lấy list user hay gì đó
+        var getPatientInfoReq = new GetPatientInfoReq("");
+        NetworkUtil.sendPacket(ctx.channel(), getPatientInfoReq);
+      }
+      case GetPatientInfoRes getPatientInfoRes -> {
+        log.info("Received get patient info {}", PacketSerializer.GSON.toJson(getPatientInfoRes));
+      }
       case null, default -> log.warn("Unknown message: {}", frame.text());
     }
   }

@@ -2,15 +2,17 @@ package BsK.server.network.handler;
 
 import BsK.common.packet.Packet;
 import BsK.common.packet.PacketSerializer;
+import BsK.common.packet.req.GetPatientInfoReq;
 import BsK.common.packet.req.LoginRequest;
-import BsK.common.packet.req.PingRequest;
 import BsK.common.packet.req.RegisterRequest;
 import BsK.common.packet.res.ErrorResponse;
 import BsK.common.packet.res.ErrorResponse.Error;
+import BsK.common.packet.res.GetPatientInfoRes;
 import BsK.common.packet.res.HandshakeCompleteResponse;
 import BsK.common.packet.res.LoginSuccessResponse;
 import BsK.common.util.network.NetworkUtil;
-import BsK.server.network.entity.User;
+import BsK.server.database.entity.Patient;
+import BsK.server.database.entity.Patient.Sex;
 import BsK.server.network.manager.UserManager;
 import BsK.server.network.util.UserUtil;
 import io.netty.channel.ChannelHandlerContext;
@@ -20,8 +22,8 @@ import io.netty.handler.codec.http.websocketx.WebSocketServerProtocolHandler.Han
 import io.netty.handler.timeout.IdleState;
 import io.netty.handler.timeout.IdleStateEvent;
 import java.io.IOException;
+import java.util.Date;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.logging.log4j.message.Message;
 
 @Slf4j
 public class ServerHandler extends SimpleChannelInboundHandler<TextWebSocketFrame> {
@@ -38,21 +40,22 @@ public class ServerHandler extends SimpleChannelInboundHandler<TextWebSocketFram
 
       if (user.isAuthenticated()) {
         log.info("User {} authenticated, role {}", user.getId(), user.getRole());
-        UserUtil.sendPacket(user.getId(), new LoginSuccessResponse());
+        UserUtil.sendPacket(user.getId(), new LoginSuccessResponse(user.getId(), user.getRole()));
       } else {
         log.info("User {} failed to authenticate", user.getId());
       }
     } else if (packet instanceof RegisterRequest registerRequest) {
-      log.debug("Received register request: {}, {}", registerRequest.getUsername(), registerRequest.getPassword());
+      log.debug(
+          "Received register request: {}, {}",
+          registerRequest.getUsername(),
+          registerRequest.getPassword());
       // Tạo user trong database hoặc check exist
       boolean isUserExist = false;
       if (isUserExist) {
         var errorResponse = new ErrorResponse(Error.USER_ALREADY_EXISTS);
         NetworkUtil.sendPacket(ctx.channel(), errorResponse);
       }
-    }
-
-    else {
+    } else {
       // Gia su packet nay can verify la user da login
       var user = UserManager.getUserByChannel(ctx.channel());
       if (!user.isAuthenticated()) {
@@ -60,7 +63,16 @@ public class ServerHandler extends SimpleChannelInboundHandler<TextWebSocketFram
         return;
       }
 
-      log.warn("Received unknown packet: {}", packet);
+      switch (packet) {
+        case GetPatientInfoReq getPatientInfoReq -> {
+          var patientInfo =
+              new Patient(getPatientInfoReq.getPatientId(), new Date(1999, 01, 01), "test",
+                  Sex.MALE);
+          var response = new GetPatientInfoRes(patientInfo);
+          UserUtil.sendPacket(user.getId(), response);
+        }
+        case null, default -> log.warn("Received unknown packet: {}", packet);
+      }
     }
   }
 
