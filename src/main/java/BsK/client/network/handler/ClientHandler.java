@@ -1,11 +1,10 @@
 package BsK.client.network.handler;
 
+import BsK.client.ui.handler.UIHandler;
 import BsK.common.packet.Packet;
 import BsK.common.packet.PacketSerializer;
-import BsK.common.packet.req.GetPatientInfoReq;
 import BsK.common.packet.req.LoginRequest;
 import BsK.common.packet.res.ErrorResponse;
-import BsK.common.packet.res.GetPatientInfoRes;
 import BsK.common.packet.res.HandshakeCompleteResponse;
 import BsK.common.packet.res.LoginSuccessResponse;
 import BsK.common.util.network.NetworkUtil;
@@ -19,7 +18,8 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class ClientHandler extends SimpleChannelInboundHandler<TextWebSocketFrame> {
-
+  public static ChannelHandlerContext ctx;
+  public static final ClientHandler INSTANCE = new ClientHandler();
   @Override
   protected void channelRead0(ChannelHandlerContext ctx, TextWebSocketFrame frame) {
     log.debug("Received message: {}", frame.text());
@@ -27,8 +27,9 @@ public class ClientHandler extends SimpleChannelInboundHandler<TextWebSocketFram
     switch (packet) {
       case HandshakeCompleteResponse handshakeCompleteResponse -> {
         log.info("Handshake complete");
-        var login = new LoginRequest("user", "user");
-        NetworkUtil.sendPacket(ctx.channel(), login);
+        this.ctx = ctx;
+//        var login = new LoginRequest("user", "user");
+//        NetworkUtil.sendPacket(ctx.channel(), login);
       }
       case ErrorResponse response -> {
         log.error("Received error response: {}", response.getError());
@@ -37,16 +38,7 @@ public class ClientHandler extends SimpleChannelInboundHandler<TextWebSocketFram
           default -> log.error("Received error response: {}", response.getError());
         }
       }
-      case LoginSuccessResponse loginSuccessResponse -> {
-        log.info("Received login success response, id {}, rold {}", loginSuccessResponse.getId(), loginSuccessResponse.getRole());
-
-        // Chỉ để demo, chỉ nên request khi mà user click lấy list user hay gì đó
-        var getPatientInfoReq = new GetPatientInfoReq("");
-        NetworkUtil.sendPacket(ctx.channel(), getPatientInfoReq);
-      }
-      case GetPatientInfoRes getPatientInfoRes -> {
-        log.info("Received get patient info {}", PacketSerializer.GSON.toJson(getPatientInfoRes));
-      }
+      case LoginSuccessResponse loginSuccessResponse -> log.info("Received login success response");
       case null, default -> log.warn("Unknown message: {}", frame.text());
     }
   }
