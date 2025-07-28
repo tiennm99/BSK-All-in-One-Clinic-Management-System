@@ -1,4 +1,4 @@
-package BsK.client.ui.component.CheckUpPage;
+package BsK.client.ui.component.DataPage;
 
 import BsK.client.Client;
 import BsK.client.LocalStorage;
@@ -156,7 +156,7 @@ import java.awt.event.FocusEvent;
 import javax.swing.text.JTextComponent;
 
 @Slf4j
-public class CheckUpPage extends JPanel {
+public class DataPage extends JPanel {
     private MainFrame mainFrame;
     private List<Patient> patientQueue = new ArrayList<>();
     private String[][] rawQueueForTv = new String[][]{};
@@ -172,7 +172,6 @@ public class CheckUpPage extends JPanel {
     private final ResponseListener<GetAllTemplatesRes> getAllTemplatesListener = this::handleGetAllTemplatesResponse;
     private final ResponseListener<UploadCheckupImageResponse> uploadImageResponseListener = this::handleUploadImageResponse;
     private final ResponseListener<UploadCheckupPdfResponse> uploadPdfResponseListener = this::handleUploadPdfResponse;
-    private final ResponseListener<SyncCheckupImagesResponse> syncImagesResponseListener = this::handleSyncImagesResponse;
     private JTextField checkupIdField, customerLastNameField, customerFirstNameField,customerAddressField, customerPhoneField, customerIdField, customerCccdDdcnField;
     private JTextArea suggestionField, diagnosisField, conclusionField; // Changed symptomsField to suggestionField
     private JTextPane notesField;
@@ -194,8 +193,6 @@ public class CheckUpPage extends JPanel {
     // Variables to store target ward and ward when loading patient address
     private String targetWard = null;
     private JComboBox<String> callRoomComboBox;
-    private JButton callPatientButton;
-    private JLabel callingStatusLabel;
     private JPanel rightContainer; // Add this field
     private List<Template> allTemplates;
     private JButton openQueueButton;
@@ -330,7 +327,7 @@ public class CheckUpPage extends JPanel {
         return -1;
     }
 
-    public CheckUpPage(MainFrame mainFrame) {
+    public DataPage(MainFrame mainFrame) {
         setLayout(new BorderLayout());
 
         // Ensure the base media directory exists
@@ -350,11 +347,9 @@ public class CheckUpPage extends JPanel {
         ClientHandler.addResponseListener(GetPatientHistoryResponse.class, patientHistoryListener);
         ClientHandler.addResponseListener(GetOrderInfoByCheckupRes.class, orderInfoByCheckupListener);
         ClientHandler.addResponseListener(GetWardResponse.class, wardResponseListener);
-        ClientHandler.addResponseListener(CallPatientResponse.class, callPatientResponseListener);
         ClientHandler.addResponseListener(GetAllTemplatesRes.class, getAllTemplatesListener);
         ClientHandler.addResponseListener(UploadCheckupImageResponse.class, uploadImageResponseListener);
         ClientHandler.addResponseListener(UploadCheckupPdfResponse.class, uploadPdfResponseListener);
-        ClientHandler.addResponseListener(SyncCheckupImagesResponse.class, syncImagesResponseListener);
 
         // Instantiate the new queue page but don't show it yet
         queueManagementPage = new QueueManagementPage();
@@ -394,22 +389,6 @@ public class CheckUpPage extends JPanel {
             queueManagementPage.toFront();
         });
 
-        JButton tvQueueButton = new JButton("Màn hình chờ TV");
-        tvQueueButton.setBackground(new Color(0, 150, 136));
-        tvQueueButton.setForeground(Color.WHITE);
-        tvQueueButton.setFocusPainted(false);
-        tvQueueButton.setBorder(BorderFactory.createEmptyBorder(8, 15, 8, 15)); // Reduced vertical padding from 10 to 8
-        tvQueueButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        tvQueueButton.addActionListener(e -> {
-            if (tvQueueFrame == null || !tvQueueFrame.isDisplayable()) {
-                tvQueueFrame = new QueueViewPage();
-            } else {
-                tvQueueFrame.toFront(); 
-            }
-            tvQueueFrame.updateQueueData(this.rawQueueForTv); 
-            tvQueueFrame.setVisible(true);
-        });
-
         addPatientButton = new JButton("<html>THÊM BN <font color='red'><b>(F2)</b></font></html>");
         addPatientButton.setBackground(new Color(63, 81, 181));
         addPatientButton.setForeground(Color.WHITE);
@@ -431,7 +410,7 @@ public class CheckUpPage extends JPanel {
                     addDialog = null;  // Clear the reference when dialog is disposed
                     // Re-register the listener after the dialog is actually disposed
                     ClientHandler.addResponseListener(GetWardResponse.class, wardResponseListener);
-                    log.info("AddDialog disposed, re-registered ward listener for CheckUpPage.");
+                    log.info("AddDialog disposed, re-registered ward listener for DataPage.");
                 }
             };
             
@@ -445,19 +424,7 @@ public class CheckUpPage extends JPanel {
         });
 
         controlPanel.add(openQueueButton);
-        controlPanel.add(tvQueueButton);
         controlPanel.add(addPatientButton);
-
-        // --- Status Label ---
-        callingStatusLabel = new JLabel(" ", SwingConstants.CENTER);
-        callingStatusLabel.setFont(new Font("Arial", Font.BOLD, 13));
-        callingStatusLabel.setForeground(new Color(0, 100, 0));
-        callingStatusLabel.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createLineBorder(Color.LIGHT_GRAY),
-            BorderFactory.createEmptyBorder(2, 10, 2, 10)
-        ));
-        callingStatusLabel.setOpaque(true);
-        callingStatusLabel.setBackground(new Color(230, 255, 230));
 
         // --- Main UI Panels ---
         // These are the main building blocks for the new layout
@@ -1146,7 +1113,7 @@ public class CheckUpPage extends JPanel {
         colorButton.setFocusPainted(false);
         colorButton.setToolTipText("Chọn màu chữ");
         colorButton.addActionListener(e -> {
-            Color newColor = JColorChooser.showDialog(CheckUpPage.this, "Chọn màu chữ", notesField.getForeground());
+            Color newColor = JColorChooser.showDialog(DataPage.this, "Chọn màu chữ", notesField.getForeground());
             if (newColor != null) {
                 MutableAttributeSet attr = new SimpleAttributeSet();
                 StyleConstants.setForeground(attr, newColor);
@@ -1445,7 +1412,6 @@ public class CheckUpPage extends JPanel {
         // New panel to hold controls at the top of the details panel
         JPanel topActionPanel = new JPanel(new BorderLayout(20, 0)); // Horizontal gap
         topActionPanel.add(controlPanel, BorderLayout.WEST);
-        topActionPanel.add(callingStatusLabel, BorderLayout.CENTER);
         
         rightBottomPanel.add(topActionPanel, BorderLayout.NORTH);
         rightBottomPanel.add(tabbedPaneContainer, BorderLayout.CENTER);
@@ -1678,18 +1644,18 @@ public class CheckUpPage extends JPanel {
             String iconPath = "src/main/java/BsK/client/ui/assets/icon/" + iconName + ".png";
             File iconFile = new File(iconPath);
             if (!iconFile.exists()) {
-                 log.warn("Icon not found for button: {}, path: {}", iconName, iconPath);
+                log.warn("Icon not found for button: {}, path: {}", iconName, iconPath);
                  // Create a placeholder icon if the file is missing
-                 BufferedImage placeholder = new BufferedImage(24, 24, BufferedImage.TYPE_INT_ARGB);
-                 Graphics2D g = placeholder.createGraphics();
-                 g.setPaint(Color.GRAY);
-                 g.fillRect(0, 0, 24, 24);
-                 g.dispose();
-                 button.setIcon(new ImageIcon(placeholder));
+                BufferedImage placeholder = new BufferedImage(24, 24, BufferedImage.TYPE_INT_ARGB);
+                Graphics2D g = placeholder.createGraphics();
+                g.setPaint(Color.GRAY);
+                g.fillRect(0, 0, 24, 24);
+                g.dispose();
+                button.setIcon(new ImageIcon(placeholder));
             } else {
-                 ImageIcon icon = new ImageIcon(iconPath);
-                 Image scaledImg = icon.getImage().getScaledInstance(24, 24, Image.SCALE_SMOOTH);
-                 button.setIcon(new ImageIcon(scaledImg));
+                ImageIcon icon = new ImageIcon(iconPath);
+                Image scaledImg = icon.getImage().getScaledInstance(24, 24, Image.SCALE_SMOOTH);
+                button.setIcon(new ImageIcon(scaledImg));
             }
         } catch (Exception e) {
             log.error("Failed to load icon for button: {}", iconName, e);
@@ -1993,24 +1959,6 @@ public class CheckUpPage extends JPanel {
         }
     }
     
-    /**
-     * Helper method to perform common actions after any save operation.
-     * @param statusToSave The patient status that was saved.
-     * @param message The message to display in the status label.
-     */
-    private void afterSaveActions(String statusToSave, String message) {
-        callingStatusLabel.setText(message);
-        callingStatusLabel.setBackground(new Color(230, 255, 230));
-        callingStatusLabel.setForeground(new Color(0, 100, 0));
-        updateUpdateQueue();
-
-        // If patient is marked as "ĐÃ KHÁM", clear the selection and details immediately.
-        if ("ĐÃ KHÁM".equals(statusToSave)) {
-            clearPatientDetails();
-            // Visually update the queue table to remove the selection highlight.
-            queueManagementPage.updateQueueTable();
-        }
-    }
     
     private void updatePrescriptionTree() {
         rootPrescriptionNode.removeAllChildren();
@@ -2291,8 +2239,6 @@ public class CheckUpPage extends JPanel {
 
         NetworkUtil.sendPacket(ClientHandler.ctx.channel(), new GetPatientHistoryRequest(Integer.parseInt(selectedPatient.getCustomerId())));
         NetworkUtil.sendPacket(ClientHandler.ctx.channel(), new GetOrderInfoByCheckupReq(selectedPatient.getCheckupId()));
-        // Sync images from server to client for consistency
-        NetworkUtil.sendPacket(ClientHandler.ctx.channel(), new SyncCheckupImagesRequest(selectedPatient.getCheckupId()));
         String fullAddress = selectedPatient.getCustomerAddress();
         String[] addressParts = fullAddress.split(", ");
         
@@ -2534,9 +2480,6 @@ public class CheckUpPage extends JPanel {
         String selectedRoomName = callRoomComboBox.getSelectedItem().toString();
         int roomId = selectedRoomIndex + 1; 
         String freeText = "<html><b>Trạng thái phòng:</b> Phòng " + selectedRoomName + " hiện đang trống</html>";
-        callingStatusLabel.setText(freeText);
-        callingStatusLabel.setForeground(new Color(0, 100, 0));
-        callingStatusLabel.setBackground(new Color(230, 255, 230)); 
         JOptionPane.showMessageDialog(this, "Phòng " + selectedRoomName + " đã được đánh dấu là trống.", "Cập nhật trạng thái phòng", JOptionPane.INFORMATION_MESSAGE);
         log.info("Room {} marked as free", selectedRoomName);
         NetworkUtil.sendPacket(ClientHandler.ctx.channel(), new CallPatientRequest(roomId, -1, "", Status.EMPTY));
@@ -2567,13 +2510,8 @@ public class CheckUpPage extends JPanel {
         // Get queue number from patient DTO and format it to 2 digits with leading zero
         String queueNumber = selectedPatient.getQueueNumber();
 
-        // Set status to PROCESSING when calling
         statusComboBox.setSelectedItem("ĐANG KHÁM");
         Status status = Status.PROCESSING;
-
-        callingStatusLabel.setText("Đang gọi bệnh nhân " + selectedPatient.getCustomerFirstName() + " (STT: " + queueNumber + ") vào phòng " + roomId);
-        callingStatusLabel.setForeground(Color.BLUE);
-        callingStatusLabel.setBackground(new Color(220, 230, 255));
         
         CallPatientRequest request = new CallPatientRequest(roomId, patientId, queueNumber, status);
         NetworkUtil.sendPacket(ClientHandler.ctx.channel(), request);
@@ -3408,7 +3346,7 @@ public class CheckUpPage extends JPanel {
                         log.error("Error initializing webcam: ", e);
                         SwingUtilities.invokeLater(() -> {
                             if (!isCleaningUp) {
-                                JOptionPane.showMessageDialog(CheckUpPage.this,
+                                JOptionPane.showMessageDialog(DataPage.this,
                                     "Error initializing webcam: " + e.getMessage(),
                                     "Webcam Error",
                                     JOptionPane.ERROR_MESSAGE);
@@ -3446,20 +3384,20 @@ public class CheckUpPage extends JPanel {
             }
 
             String timestamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
-            String fileName = "IMG_" + currentCheckupIdForMedia + "_" + timestamp + ".jpg";
+            String fileName = "IMG_" + currentCheckupIdForMedia + "_" + timestamp + ".png";
             Path filePath = currentCheckupMediaPath.resolve(fileName);
 
             try {
                 BufferedImage image = selectedWebcam.getImage();
                 if (image != null) {
-                    // Save locally as JPG for consistency (compressed format for client storage)
-                    ImageIO.write(image, "JPG", filePath.toFile());
-                    log.info("Picture taken and saved locally as JPG at: {}", filePath);
+                    // Save locally first for immediate UI feedback (PNG for high quality local cache)
+                    ImageIO.write(image, "PNG", filePath.toFile());
+                    log.info("Picture taken and saved locally at: {}", filePath);
 
                     // Refresh UI to show the new image immediately
                     loadAndDisplayImages(currentCheckupMediaPath);
 
-                    // Now, upload in the background (server will convert to PNG for archival)
+                    // Now, upload in the background (will be compressed to JPG)
                     uploadImageInBackground(filePath.getFileName().toString(), image);
 
                 } else {
@@ -3503,15 +3441,15 @@ public class CheckUpPage extends JPanel {
                 // Create and send the request
                 String checkupId = currentCheckupIdForMedia;
 
-                // Keep original filename since we're already using JPG locally
-                String jpgFileName = fileName;
+                // Adjust file name to have .jpg extension for the server
+                String jpgFileName = fileName.substring(0, fileName.lastIndexOf('.')) + ".jpg";
 
                 // Schedule a timeout task for this upload
                 Future<?> timeoutTask = timeoutExecutor.schedule(() -> {
                     // If the task is still in the map, it means we timed out
                     if (uploadTimeoutTasks.remove(jpgFileName) != null) {
                         SwingUtilities.invokeLater(() -> {
-                            JOptionPane.showMessageDialog(CheckUpPage.this,
+                            JOptionPane.showMessageDialog(DataPage.this,
                                 "Không nhận được phản hồi từ máy chủ khi tải lên ảnh: " + jpgFileName + "\n" +
                                 "Vui lòng kiểm tra lại kết nối mạng (Wi-Fi/Internet).",
                                 "Lỗi Mạng",
@@ -3557,10 +3495,6 @@ public class CheckUpPage extends JPanel {
     private void handleUploadPdfResponse(UploadCheckupPdfResponse response) {
         if (response.isSuccess()) {
             log.info("Successfully uploaded PDF: {} - {}", response.getPdfType(), response.getMessage());
-            SwingUtilities.invokeLater(() -> {
-                callingStatusLabel.setText("Đã lưu PDF thành công: " + response.getPdfType());
-                callingStatusLabel.setForeground(new Color(0, 100, 0));
-            });
         } else {
             log.error("Failed to upload PDF: {} - {}", response.getPdfType(), response.getMessage());
             SwingUtilities.invokeLater(() -> {
@@ -3568,84 +3502,6 @@ public class CheckUpPage extends JPanel {
                         "Lỗi khi tải PDF lên server: " + response.getMessage(),
                         "Lỗi Tải PDF",
                         JOptionPane.ERROR_MESSAGE);
-            });
-        }
-    }
-
-    private void handleSyncImagesResponse(SyncCheckupImagesResponse response) {
-        if (response.isSuccess()) {
-            log.info("Successfully synced images for checkup {}: {}", response.getCheckupId(), response.getMessage());
-            
-            SwingUtilities.invokeLater(() -> {
-                try {
-                    // Create media directory for this checkup if it doesn't exist
-                    java.io.File mediaDir = new java.io.File("src/main/resources/image/checkup_media", response.getCheckupId());
-                    if (!mediaDir.exists()) {
-                        mediaDir.mkdirs();
-                    }
-                    
-                    // Save each image to local media directory, converting to JPG format for client consistency
-                    for (int i = 0; i < response.getImageNames().size(); i++) {
-                        String imageName = response.getImageNames().get(i);
-                        byte[] imageData = response.getImageDatas().get(i);
-                        
-                        // Convert filename to JPG extension for client storage consistency
-                        String jpgImageName = imageName.substring(0, imageName.lastIndexOf('.')) + ".jpg";
-                        java.io.File imageFile = new java.io.File(mediaDir, jpgImageName);
-                        
-                        try {
-                            // Convert image data to JPG format for client storage
-                            try (java.io.ByteArrayInputStream bais = new java.io.ByteArrayInputStream(imageData)) {
-                                java.awt.image.BufferedImage image = javax.imageio.ImageIO.read(bais);
-                                if (image != null) {
-                                    javax.imageio.ImageIO.write(image, "JPG", imageFile);
-                                    log.debug("Synced and converted image to JPG: {}", imageFile.getAbsolutePath());
-                                } else {
-                                    // Fallback: save as original format if conversion fails
-                                    try (java.io.FileOutputStream fos = new java.io.FileOutputStream(new java.io.File(mediaDir, imageName))) {
-                                        fos.write(imageData);
-                                        log.warn("Failed to convert image to JPG, saved as original format: {}", imageName);
-                                    }
-                                }
-                            }
-                        } catch (Exception e) {
-                            log.error("Failed to process synced image {}: {}", imageName, e.getMessage());
-                            // Fallback: save as original format
-                            try (java.io.FileOutputStream fos = new java.io.FileOutputStream(new java.io.File(mediaDir, imageName))) {
-                                fos.write(imageData);
-                                log.warn("Saved image as original format due to conversion error: {}", imageName);
-                            }
-                        }
-                    }
-                    
-                    // Update the current media path and refresh the gallery if this is for the current checkup
-                    if (response.getCheckupId().equals(currentCheckupIdForMedia)) {
-                        currentCheckupMediaPath = mediaDir.toPath();
-                        loadAndDisplayImages(currentCheckupMediaPath);
-                        log.info("Refreshed image gallery with {} synced images", response.getImageNames().size());
-                    }
-                    
-                    // Update UI status
-                    if (callingStatusLabel != null) {
-                        callingStatusLabel.setText("Đã đồng bộ " + response.getImageNames().size() + " hình ảnh từ server");
-                        callingStatusLabel.setForeground(new Color(0, 100, 0));
-                    }
-                    
-                } catch (Exception e) {
-                    log.error("Failed to save synced images locally: {}", e.getMessage());
-                    if (callingStatusLabel != null) {
-                        callingStatusLabel.setText("Lỗi khi lưu hình ảnh đồng bộ: " + e.getMessage());
-                        callingStatusLabel.setForeground(Color.RED);
-                    }
-                }
-            });
-        } else {
-            log.warn("Image sync failed for checkup {}: {}", response.getCheckupId(), response.getMessage());
-            SwingUtilities.invokeLater(() -> {
-                if (callingStatusLabel != null) {
-                    callingStatusLabel.setText("Đồng bộ hình ảnh: " + response.getMessage());
-                    callingStatusLabel.setForeground(new Color(200, 100, 0)); // Orange for warning
-                }
             });
         }
     }
@@ -3828,7 +3684,7 @@ public class CheckUpPage extends JPanel {
                         } catch (Exception e) {
                             log.error("Error during video recording: {}", e.getMessage(), e);
                             SwingUtilities.invokeLater(() -> {
-                                JOptionPane.showMessageDialog(CheckUpPage.this,
+                                JOptionPane.showMessageDialog(DataPage.this,
                                     "Lỗi trong quá trình ghi video: " + e.getMessage(),
                                     "Lỗi Ghi Video",
                                     JOptionPane.ERROR_MESSAGE);
@@ -4122,7 +3978,7 @@ public class CheckUpPage extends JPanel {
 
     /**
      * A separate window (JFrame) to manage and display the patient queue.
-     * It communicates with the main CheckUpPage to handle patient selection.
+     * It communicates with the main DataPage to handle patient selection.
      */
     private class QueueManagementPage extends JDialog {
         private JTable queueTable;
@@ -4223,7 +4079,7 @@ public class CheckUpPage extends JPanel {
                                     }
                                 }
                                 // Call the parent class's method to handle the selection
-                                CheckUpPage.this.handleRowSelection(getSelectedRow());
+                                DataPage.this.handleRowSelection(getSelectedRow());
                                 // Reset patient name filter when closing dialog after selection
                                 patientNameFilter.setText("");
                                 applyFilters();
@@ -4266,7 +4122,7 @@ public class CheckUpPage extends JPanel {
                                 }
                             }
                             // Call the parent class's method to handle the selection
-                            CheckUpPage.this.handleRowSelection(getSelectedRow());
+                            DataPage.this.handleRowSelection(getSelectedRow());
                             // Reset patient name filter when closing dialog after selection
                             patientNameFilter.setText("");
                             applyFilters();
@@ -4424,7 +4280,7 @@ public class CheckUpPage extends JPanel {
          */
         public void updateQueueTable() {
             SwingUtilities.invokeLater(() -> {
-                String previouslySelectedId = CheckUpPage.this.selectedCheckupId;
+                String previouslySelectedId = DataPage.this.selectedCheckupId;
 
                 // Update filtered patients list and apply current filters
                 filteredPatients = new ArrayList<>(patientQueue);
@@ -4716,10 +4572,7 @@ public class CheckUpPage extends JPanel {
         if (template.getSuggestion() != null && !template.getSuggestion().isEmpty()) {
             suggestionField.setText(template.getSuggestion());
         }
-        
-        callingStatusLabel.setText("Đã áp dụng mẫu '" + template.getTemplateName() + "'.");
-        callingStatusLabel.setBackground(new Color(220, 230, 255));
-        callingStatusLabel.setForeground(new Color(0, 0, 139));
+    
     }
 
     private void handleGetAllTemplatesResponse(GetAllTemplatesRes response) {
