@@ -6,7 +6,8 @@ import lombok.Data;
 
 @Data
 @AllArgsConstructor
-public class AddMedicineRequest implements Packet{
+public class EditMedicineRequest implements Packet {
+    private String id;
     private String name;
     private String company;
     private String description;
