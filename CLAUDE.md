@@ -147,3 +147,22 @@ When adding features that involve:
 - **Database operations**: Add handlers in `ServerHandler.java`
 - **UI components**: Extend existing page patterns and use shared components
 - **File operations**: Use server-side file management with optional Google Drive sync
+
+## Resource Loading (IMPORTANT)
+
+**JRXML and Resource Files**: 
+- JRXML templates are stored in `src/main/resources/print_forms/` (for JAR inclusion)
+- Duplicate copies exist in `src/main/java/.../print_forms/` (for IDE compatibility)
+- Always use `getResourceAsStream("/print_forms/filename.jrxml")` for loading resources
+- Never use file system paths (`System.getProperty("user.dir")`) as they won't work in JAR
+
+**Example of correct resource loading**:
+```java
+String resourcePath = "/print_forms/medserinvoice.jrxml";
+try (InputStream inputStream = MyClass.class.getResourceAsStream(resourcePath)) {
+    if (inputStream == null) {
+        throw new FileNotFoundException("Template not found: " + resourcePath);
+    }
+    // Use inputStream...
+}
+```

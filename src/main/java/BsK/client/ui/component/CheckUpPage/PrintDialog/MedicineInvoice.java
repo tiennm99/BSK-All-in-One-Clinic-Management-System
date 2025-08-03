@@ -337,7 +337,7 @@ public class MedicineInvoice{
             // Pass the InputStream to the report parameter
             parameters.put("logoImage", logoStream);
         }
-        String resourcePath = "/BsK/client/ui/component/CheckUpPage/PrintDialog/print_forms/medserinvoice.jrxml";
+        String resourcePath = "/print_forms/medserinvoice.jrxml";
         try (InputStream inputStream = MedicineInvoice.class.getResourceAsStream(resourcePath)) {
             if (inputStream == null) {
 

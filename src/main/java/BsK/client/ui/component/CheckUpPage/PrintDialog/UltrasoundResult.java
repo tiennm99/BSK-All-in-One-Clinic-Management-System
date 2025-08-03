@@ -23,6 +23,7 @@ import com.itextpdf.layout.property.UnitValue;
 import com.itextpdf.layout.property.VerticalAlignment;
 import com.itextpdf.layout.element.AreaBreak;
 import lombok.extern.slf4j.Slf4j;
+import java.io.FileNotFoundException;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.rendering.PDFRenderer;
 
@@ -171,16 +172,19 @@ public class UltrasoundResult {
     }
 
     public JasperPrint createJasperPrint() throws JRException, IOException {
-        String jrxmlPath;
+        String resourcePath;
         if ("Dọc".equalsIgnoreCase(this.printType)) {
-            jrxmlPath = System.getProperty("user.dir") + "/src/main/java/BsK/client/ui/component/CheckUpPage/PrintDialog/print_forms/ultrasoundresult_potrait.jrxml";
+            resourcePath = "/print_forms/ultrasoundresult_potrait.jrxml";
         } else {
-            jrxmlPath = System.getProperty("user.dir") + "/src/main/java/BsK/client/ui/component/CheckUpPage/PrintDialog/print_forms/ultrasoundresult.jrxml";
+            resourcePath = "/print_forms/ultrasoundresult.jrxml";
         }
         
-        log.info("Using JRXML template: {}", jrxmlPath);
+        log.info("Using JRXML template: {}", resourcePath);
 
-        try (InputStream inputStream = new FileInputStream(new File(jrxmlPath))) {
+        try (InputStream inputStream = UltrasoundResult.class.getResourceAsStream(resourcePath)) {
+            if (inputStream == null) {
+                throw new FileNotFoundException("Không thể tìm thấy tệp mẫu Jasper report trong classpath: " + resourcePath);
+            }
             Map<String, Object> parameters = new HashMap<>();
 
             // Set locale for date/number formatting

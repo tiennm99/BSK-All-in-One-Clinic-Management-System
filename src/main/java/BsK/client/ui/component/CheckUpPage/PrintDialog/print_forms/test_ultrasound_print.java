@@ -12,6 +12,7 @@ import net.sf.jasperreports.engine.JRParameter;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Locale;
@@ -96,8 +97,11 @@ public class test_ultrasound_print {
             }
             
             // 9. Load and compile the report
-            String jrxmlPath = projectDir + "/src/main/java/BsK/client/ui/component/CheckUpPage/PrintDialog/print_forms/ultrasoundresult.jrxml";
-            InputStream inputStream = new FileInputStream(new File(jrxmlPath));
+            String resourcePath = "/print_forms/ultrasoundresult.jrxml";
+            InputStream inputStream = test_ultrasound_print.class.getResourceAsStream(resourcePath);
+            if (inputStream == null) {
+                throw new FileNotFoundException("Không thể tìm thấy tệp mẫu Jasper report trong classpath: " + resourcePath);
+            }
 
             JasperDesign jasperDesign = JRXmlLoader.load(inputStream);
             JasperReport jasperReport = JasperCompileManager.compileReport(jasperDesign);
