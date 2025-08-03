@@ -327,7 +327,7 @@ public class MedicineInvoice{
         parameters.put("hasServices", !serviceItems.isEmpty());
         parameters.put("hasSupplements", !supplementItems.isEmpty());
 
-        String logoPath = "/BsK/client/ui/assets/icon/logo.jpg";
+        String logoPath = "/assets/icon/logo.jpg";
         // Load the logo as an InputStream
         InputStream logoStream = MedicineInvoice.class.getResourceAsStream(logoPath);
         if (logoStream == null) {

@@ -9,6 +9,7 @@ import BsK.common.packet.req.GetAllUserInfoRequest;
 import BsK.common.packet.res.GetAllUserInfoResponse;
 import BsK.common.util.network.NetworkUtil;
 import BsK.common.util.text.TextUtils;
+import BsK.client.ui.util.ResourceLoader;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.swing.*;
@@ -159,7 +160,7 @@ public class UserManagementPanel extends JPanel {
         
         JButton viewPasswordButton = new JButton();
         try {
-            ImageIcon viewIcon = new ImageIcon("src/main/java/BsK/client/ui/assets/icon/view.png");
+            ImageIcon viewIcon = ResourceLoader.loadAssetIcon("view.png");
             Image scaledImage = viewIcon.getImage().getScaledInstance(20, 20, Image.SCALE_SMOOTH);
             viewPasswordButton.setIcon(new ImageIcon(scaledImage));
         } catch (Exception e) {

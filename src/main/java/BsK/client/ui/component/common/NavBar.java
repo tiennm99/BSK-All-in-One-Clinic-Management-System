@@ -16,6 +16,7 @@ import BsK.common.packet.res.EmergencyResponse;
 import BsK.common.packet.res.ErrorResponse;
 import BsK.common.packet.res.SimpleMessageResponse;
 import lombok.extern.slf4j.Slf4j;
+import BsK.client.ui.util.ResourceLoader;
 import javax.swing.Icon;
 
 import javax.swing.*;
@@ -138,11 +139,12 @@ public class NavBar extends JPanel {
             label.setOpaque(false);
 
             try {
-                String iconPath = "src/main/java/BsK/client/ui/assets/icon/" + iconFileName;
-                ImageIcon originalIcon = new ImageIcon(iconPath);
-                Image scaledImage = originalIcon.getImage().getScaledInstance(20, 20, Image.SCALE_SMOOTH);
-                ImageIcon scaledIcon = new ImageIcon(scaledImage);
-                label.setIcon(scaledIcon);
+                ImageIcon originalIcon = ResourceLoader.loadAssetIcon(iconFileName);
+                if (originalIcon != null) {
+                    Image scaledImage = originalIcon.getImage().getScaledInstance(20, 20, Image.SCALE_SMOOTH);
+                    ImageIcon scaledIcon = new ImageIcon(scaledImage);
+                    label.setIcon(scaledIcon);
+                }
             } catch (Exception e) {
                 System.err.println("Error loading icon: " + iconFileName + " for nav item: " + itemText);
                 e.printStackTrace();
@@ -355,10 +357,11 @@ public class NavBar extends JPanel {
         buttonLabel.setOpaque(false);
 
         try {
-            String iconPath = "src/main/java/BsK/client/ui/assets/icon/emergency.png";
-            ImageIcon originalIcon = new ImageIcon(iconPath);
-            Image scaledImage = originalIcon.getImage().getScaledInstance(20, 20, Image.SCALE_SMOOTH);
-            buttonLabel.setIcon(new ImageIcon(scaledImage));
+            ImageIcon emergencyIcon = ResourceLoader.loadAssetIcon("emergency.png");
+            if (emergencyIcon != null) {
+                Image scaledImage = emergencyIcon.getImage().getScaledInstance(20, 20, Image.SCALE_SMOOTH);
+                buttonLabel.setIcon(new ImageIcon(scaledImage));
+            }
         } catch (Exception e) {
             System.err.println("Error loading icon: emergency.png. Using text fallback.");
             buttonLabel.setText("Khẩn cấp");
@@ -453,11 +456,12 @@ public class NavBar extends JPanel {
         buttonLabel.setOpaque(false);
 
         try {
-            String iconPath = "src/main/java/BsK/client/ui/assets/icon/chat.png";
-            ImageIcon originalIcon = new ImageIcon(iconPath);
-            // Use a slightly smaller icon
-            Image scaledImage = originalIcon.getImage().getScaledInstance(24, 24, Image.SCALE_SMOOTH);
-            buttonLabel.setIcon(new ImageIcon(scaledImage));
+            ImageIcon chatIcon = ResourceLoader.loadAssetIcon("chat.png");
+            if (chatIcon != null) {
+                // Use a slightly smaller icon
+                Image scaledImage = chatIcon.getImage().getScaledInstance(24, 24, Image.SCALE_SMOOTH);
+                buttonLabel.setIcon(new ImageIcon(scaledImage));
+            }
         } catch (Exception e) {
             log.error("Error loading icon: chat.png. Using text fallback.");
             buttonLabel.setText("Msg"); // Fallback text if icon fails

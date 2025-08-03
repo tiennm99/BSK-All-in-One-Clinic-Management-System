@@ -150,19 +150,27 @@ When adding features that involve:
 
 ## Resource Loading (IMPORTANT)
 
-**JRXML and Resource Files**: 
-- JRXML templates are stored in `src/main/resources/print_forms/` (for JAR inclusion)
-- Duplicate copies exist in `src/main/java/.../print_forms/` (for IDE compatibility)
-- Always use `getResourceAsStream("/print_forms/filename.jrxml")` for loading resources
-- Never use file system paths (`System.getProperty("user.dir")`) as they won't work in JAR
+**All assets now properly organized in `src/main/resources/`**:
+- **JRXML templates**: `src/main/resources/print_forms/`
+- **UI assets**: `src/main/resources/assets/` (icon, img, font, gif subdirectories)
+- **Fonts**: `src/main/resources/fonts/` (JasperReports fonts)
 
-**Example of correct resource loading**:
+**Use ResourceLoader utility class** for all asset loading:
 ```java
-String resourcePath = "/print_forms/medserinvoice.jrxml";
-try (InputStream inputStream = MyClass.class.getResourceAsStream(resourcePath)) {
-    if (inputStream == null) {
-        throw new FileNotFoundException("Template not found: " + resourcePath);
-    }
-    // Use inputStream...
-}
+import BsK.client.ui.util.ResourceLoader;
+
+// Load icons
+ImageIcon icon = ResourceLoader.loadAssetIcon("logo.jpg");
+
+// Load images  
+ImageIcon image = ResourceLoader.loadAssetImage("background.jpeg");
+
+// Load any resource stream
+InputStream stream = ResourceLoader.loadResourceStream("/print_forms/template.jrxml");
 ```
+
+**Important Notes**:
+- Never use file system paths (`System.getProperty("user.dir")`) - they won't work in JAR
+- All asset references now use proper classpath resource loading
+- ResourceLoader handles null checks and provides fallbacks
+- Assets work consistently in both IDE and packaged JAR files

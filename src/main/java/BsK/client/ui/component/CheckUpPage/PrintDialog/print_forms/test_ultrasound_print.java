@@ -74,8 +74,8 @@ public class test_ultrasound_print {
 
             // 7. Add logo image path
             String projectDir = System.getProperty("user.dir");
-            String logoPath = projectDir + "/src/main/java/BsK/client/ui/assets/icon/logo.jpg";
-            parameters.put("logoImage", logoPath);
+            InputStream logoStream = test_ultrasound_print.class.getResourceAsStream("/assets/icon/logo.jpg");
+            parameters.put("logoImage", logoStream);
 
             // 8. Add paths for the 6 ultrasound images
             String imageDir = projectDir + "/img_db/8/";

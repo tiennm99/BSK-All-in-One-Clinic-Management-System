@@ -4,6 +4,7 @@ import BsK.client.ui.component.MainFrame;
 import BsK.client.ui.component.common.RoundedButtonUI;
 
 import javax.swing.*;
+import BsK.client.ui.util.ResourceLoader;
 import java.awt.*;
 
 public class LandingPage extends JPanel {
@@ -16,7 +17,13 @@ public class LandingPage extends JPanel {
             protected void paintComponent(Graphics g) {
                 super.paintComponent(g);
                 Graphics2D g2d = (Graphics2D) g;
-                ImageIcon icon = new ImageIcon("src/main/java/BsK/client/ui/assets/img/landingpagebg.jpeg");
+                ImageIcon icon = ResourceLoader.loadAssetImage("landingpagebg.jpeg");
+                if (icon == null) {
+                    // Create a default background if image not found
+                    g2d.setColor(new Color(64, 64, 64));
+                    g2d.fillRect(0, 0, getWidth(), getHeight());
+                    return;
+                }
                 Image image = icon.getImage();
                 g2d.drawImage(image, 0, 0, getWidth(), getHeight(), this);
                 Color tint = new Color(0, 0, 0, 100); // Black tint with transparency

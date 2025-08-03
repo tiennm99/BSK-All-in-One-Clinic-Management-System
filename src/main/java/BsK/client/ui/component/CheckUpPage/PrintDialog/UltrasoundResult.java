@@ -231,7 +231,14 @@ public class UltrasoundResult {
             int numberOfImages = this.selectedImages.size();
             parameters.put("numberImage", numberOfImages);
             
-            parameters.put("logoImage", System.getProperty("user.dir") + "/src/main/java/BsK/client/ui/assets/icon/logo.jpg");
+            // Load logo as resource
+            InputStream logoStream = UltrasoundResult.class.getResourceAsStream("/assets/icon/logo.jpg");
+            if (logoStream != null) {
+                parameters.put("logoImage", logoStream);
+            } else {
+                parameters.put("logoImage", null);
+                log.warn("Logo image not found in resources");
+            }
 
             for (int i = 0; i < 6; i++) {
                 if (i < numberOfImages) {
@@ -329,10 +336,41 @@ public class UltrasoundResult {
         }
         document.setMargins(20, 20, 20, 20);
 
-        String boldFontPath = "src/main/java/BsK/client/ui/assets/font/SVN-Arial Bold.ttf";
-        PdfFont boldFont = PdfFontFactory.createFont(boldFontPath, "Identity-H", true);
-        String fontPath = "src/main/java/BsK/client/ui/assets/font/SVN-Arial Regular.ttf";
-        PdfFont font = PdfFontFactory.createFont(fontPath, "Identity-H", true);
+        // Load fonts from resources
+        PdfFont boldFont = null;
+        PdfFont font = null;
+        
+        try {
+            InputStream boldFontStream = UltrasoundResult.class.getResourceAsStream("/assets/font/SVN-Arial Bold.ttf");
+            if (boldFontStream != null) {
+                boldFont = PdfFontFactory.createFont(boldFontStream.readAllBytes(), "Identity-H", true);
+            }
+            
+            InputStream regularFontStream = UltrasoundResult.class.getResourceAsStream("/assets/font/SVN-Arial Regular.ttf");
+            if (regularFontStream != null) {
+                font = PdfFontFactory.createFont(regularFontStream.readAllBytes(), "Identity-H", true);
+            }
+        } catch (Exception e) {
+            log.warn("Failed to load custom fonts, using default: " + e.getMessage());
+        }
+        
+        // Fallback to default font if custom fonts couldn't be loaded
+        if (boldFont == null) {
+            try {
+                boldFont = PdfFontFactory.createFont(StandardFonts.HELVETICA_BOLD);
+            } catch (Exception e) {
+                log.error("Failed to create fallback bold font", e);
+                return; // Cannot proceed without fonts
+            }
+        }
+        if (font == null) {
+            try {
+                font = PdfFontFactory.createFont(StandardFonts.HELVETICA);
+            } catch (Exception e) {
+                log.error("Failed to create fallback regular font", e);
+                return; // Cannot proceed without fonts
+            }
+        }
 
         String title = templateTitle != null ? templateTitle.toUpperCase() : "KẾT QUẢ SIÊU ÂM";
 
@@ -357,9 +395,14 @@ public class UltrasoundResult {
                 .setBorder(Border.NO_BORDER)
                 .setMarginBottom(2);
         try {
-            String logoPath = "src/main/java/BsK/client/ui/assets/icon/clinic_logo.png";
-            Image logo = new Image(ImageDataFactory.create(logoPath)).scaleToFit(50, 50);
-            headerTable.addCell(new Cell().add(logo).setBorder(Border.NO_BORDER).setVerticalAlignment(VerticalAlignment.MIDDLE));
+            InputStream logoStream = UltrasoundResult.class.getResourceAsStream("/assets/icon/clinic_logo.png");
+            if (logoStream != null) {
+                Image logo = new Image(ImageDataFactory.create(logoStream.readAllBytes())).scaleToFit(50, 50);
+                headerTable.addCell(new Cell().add(logo).setBorder(Border.NO_BORDER).setVerticalAlignment(VerticalAlignment.MIDDLE));
+            } else {
+                headerTable.addCell(new Cell().setBorder(Border.NO_BORDER));
+                log.warn("Clinic logo not found in resources");
+            }
         } catch (Exception e) {
             headerTable.addCell(new Cell().setBorder(Border.NO_BORDER));
             log.warn("Clinic logo not found", e);
@@ -590,9 +633,14 @@ public class UltrasoundResult {
                 .setBorder(Border.NO_BORDER)
                 .setMarginBottom(5);
         try {
-            String logoPath = "src/main/java/BsK/client/ui/assets/icon/clinic_logo.png";
-            Image logo = new Image(ImageDataFactory.create(logoPath)).scaleToFit(50, 50);
-            headerTable.addCell(new Cell().add(logo).setBorder(Border.NO_BORDER).setVerticalAlignment(VerticalAlignment.MIDDLE));
+            InputStream logoStream = UltrasoundResult.class.getResourceAsStream("/assets/icon/clinic_logo.png");
+            if (logoStream != null) {
+                Image logo = new Image(ImageDataFactory.create(logoStream.readAllBytes())).scaleToFit(50, 50);
+                headerTable.addCell(new Cell().add(logo).setBorder(Border.NO_BORDER).setVerticalAlignment(VerticalAlignment.MIDDLE));
+            } else {
+                headerTable.addCell(new Cell().setBorder(Border.NO_BORDER));
+                log.warn("Clinic logo not found in resources");
+            }
         } catch (Exception e) {
             headerTable.addCell(new Cell().setBorder(Border.NO_BORDER));
             log.warn("Clinic logo not found", e);

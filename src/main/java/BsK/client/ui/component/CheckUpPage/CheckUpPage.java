@@ -25,6 +25,7 @@ import BsK.common.packet.req.*;
 import BsK.common.packet.res.*;
 import BsK.common.util.network.NetworkUtil;
 import BsK.common.util.text.TextUtils;
+import BsK.client.ui.util.ResourceLoader;
 import lombok.extern.slf4j.Slf4j;
 import org.jdatepicker.impl.JDatePanelImpl;
 import org.jdatepicker.impl.JDatePickerImpl;
@@ -557,9 +558,11 @@ public class CheckUpPage extends JPanel {
 
         // Load and set the icon
         try {
-            String iconPath = "src/main/java/BsK/client/ui/assets/icon/google-drive.png";
-            ImageIcon driveIcon = new ImageIcon(new ImageIcon(iconPath).getImage().getScaledInstance(20, 20, Image.SCALE_SMOOTH));
-            driveButton.setIcon(driveIcon);
+            ImageIcon originalIcon = ResourceLoader.loadAssetIcon("google-drive.png");
+            if (originalIcon != null) {
+                ImageIcon driveIcon = new ImageIcon(originalIcon.getImage().getScaledInstance(20, 20, Image.SCALE_SMOOTH));
+                driveButton.setIcon(driveIcon);
+            }
         } catch (Exception e) {
             log.error("Failed to load Google Drive icon", e);
         }
@@ -1351,8 +1354,8 @@ public class CheckUpPage extends JPanel {
         tabbedPane.setForeground(new Color(63, 81, 181));
         
         // Add tabs with icons
-        ImageIcon patientIcon = new ImageIcon("src/main/java/BsK/client/ui/assets/icon/user.png");
-        ImageIcon checkupIcon = new ImageIcon("src/main/java/BsK/client/ui/assets/icon/health-check.png");
+        ImageIcon patientIcon = ResourceLoader.loadAssetIcon("user.png");
+        ImageIcon checkupIcon = ResourceLoader.loadAssetIcon("health-check.png");
         
         // Scale icons if needed
         if (patientIcon.getIconWidth() > 20) {
@@ -1681,10 +1684,9 @@ public class CheckUpPage extends JPanel {
     private JButton createActionButton(String iconName, String text, Color bgColor) {
         JButton button = new JButton(text);
         try {
-            String iconPath = "src/main/java/BsK/client/ui/assets/icon/" + iconName + ".png";
-            File iconFile = new File(iconPath);
-            if (!iconFile.exists()) {
-                 log.warn("Icon not found for button: {}, path: {}", iconName, iconPath);
+            ImageIcon originalIcon = ResourceLoader.loadAssetIcon(iconName + ".png");
+            if (originalIcon == null) {
+                 log.warn("Icon not found for button: {}", iconName);
                  // Create a placeholder icon if the file is missing
                  BufferedImage placeholder = new BufferedImage(24, 24, BufferedImage.TYPE_INT_ARGB);
                  Graphics2D g = placeholder.createGraphics();
@@ -1693,8 +1695,7 @@ public class CheckUpPage extends JPanel {
                  g.dispose();
                  button.setIcon(new ImageIcon(placeholder));
             } else {
-                 ImageIcon icon = new ImageIcon(iconPath);
-                 Image scaledImg = icon.getImage().getScaledInstance(24, 24, Image.SCALE_SMOOTH);
+                 Image scaledImg = originalIcon.getImage().getScaledInstance(24, 24, Image.SCALE_SMOOTH);
                  button.setIcon(new ImageIcon(scaledImg));
             }
         } catch (Exception e) {
@@ -2737,12 +2738,12 @@ public class CheckUpPage extends JPanel {
         buttonPanel.setOpaque(false);
         
         takePictureButton = new JButton("<html>Chụp ảnh <font color='red'><b>(F5)</b></font></html>");
-        takePictureButton.setIcon(new ImageIcon("src/main/java/BsK/client/ui/assets/icon/camera.png"));
+        takePictureButton.setIcon(ResourceLoader.loadAssetIcon("camera.png"));
         takePictureButton.addActionListener(e -> handleTakePicture());
         takePictureButton.setEnabled(false);
         
         recordVideoButton = new JButton("<html>Quay video <font color='red'><b>(F6)</b></font></html>");
-        recordVideoButton.setIcon(new ImageIcon("src/main/java/BsK/client/ui/assets/icon/video-camera.png"));
+        recordVideoButton.setIcon(ResourceLoader.loadAssetIcon("video-camera.png"));
         recordVideoButton.addActionListener(e -> handleRecordVideo());
         recordVideoButton.setEnabled(false);
         
@@ -2764,7 +2765,7 @@ public class CheckUpPage extends JPanel {
     // Helper method to load and scale the reload icon
     private ImageIcon getReloadIcon() {
         try {
-            ImageIcon reloadIcon = new ImageIcon("src/main/java/BsK/client/ui/assets/icon/reload.png");
+            ImageIcon reloadIcon = ResourceLoader.loadAssetIcon("reload.png");
             Image scaledImage = reloadIcon.getImage().getScaledInstance(16, 16, Image.SCALE_SMOOTH);
             return new ImageIcon(scaledImage);
         } catch (Exception e) {
@@ -4143,7 +4144,10 @@ public class CheckUpPage extends JPanel {
         public QueueManagementPage() {
             super(mainFrame, "Danh sách chờ khám", true); // Set as modal dialog
             
-            setIconImage(new ImageIcon("src/main/java/BsK/client/ui/assets/icon/database.png").getImage());
+            ImageIcon dbIcon = ResourceLoader.loadAssetIcon("database.png");
+            if (dbIcon != null) {
+                setIconImage(dbIcon.getImage());
+            }
             setSize(1000, 700); // Increased size to accommodate filters and new column
             setLayout(new BorderLayout());
             

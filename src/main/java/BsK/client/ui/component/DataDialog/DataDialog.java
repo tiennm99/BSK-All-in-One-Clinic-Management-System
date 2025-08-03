@@ -10,6 +10,7 @@ import BsK.common.packet.req.GetCheckupDataRequest;
 import BsK.common.packet.res.GetCheckupDataResponse;
 import BsK.common.util.network.NetworkUtil;
 import BsK.client.ui.component.CheckUpPage.CheckUpPage;
+import BsK.client.ui.util.ResourceLoader;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -515,13 +516,13 @@ public class DataDialog extends JDialog {
         public ActionButtonRenderer() {
             setLayout(new FlowLayout(FlowLayout.CENTER, 2, 2));
 
-            ImageIcon editIcon = new ImageIcon("src/main/java/BsK/client/ui/assets/icon/edit.png");
+            ImageIcon editIcon = ResourceLoader.loadAssetIcon("edit.png");
             if (editIcon.getImage() != null) {
                  editIcon.setImage(editIcon.getImage().getScaledInstance(16, 16, Image.SCALE_SMOOTH));
             }
             editButton = new JButton(editIcon);
 
-            ImageIcon deleteIcon = new ImageIcon("src/main/java/BsK/client/ui/assets/icon/delete.png");
+            ImageIcon deleteIcon = ResourceLoader.loadAssetIcon("delete.png");
             if (deleteIcon.getImage() != null) {
                  deleteIcon.setImage(deleteIcon.getImage().getScaledInstance(16, 16, Image.SCALE_SMOOTH));
             }
@@ -556,13 +557,13 @@ public class DataDialog extends JDialog {
             super(new JCheckBox());
             panel = new JPanel(new FlowLayout(FlowLayout.CENTER, 2, 2));
 
-            ImageIcon editIcon = new ImageIcon("src/main/java/BsK/client/ui/assets/icon/edit.png");
+            ImageIcon editIcon = ResourceLoader.loadAssetIcon("edit.png");
             if (editIcon.getImage() != null) {
                 editIcon.setImage(editIcon.getImage().getScaledInstance(16, 16, Image.SCALE_SMOOTH));
             }
             editButton = new JButton(editIcon);
 
-            ImageIcon deleteIcon = new ImageIcon("src/main/java/BsK/client/ui/assets/icon/delete.png");
+            ImageIcon deleteIcon = ResourceLoader.loadAssetIcon("delete.png");
             if (deleteIcon.getImage() != null) {
                  deleteIcon.setImage(deleteIcon.getImage().getScaledInstance(16, 16, Image.SCALE_SMOOTH));
             }
